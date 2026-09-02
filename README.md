@@ -1,4 +1,4 @@
-# LTE FCC TxPower
+# LTE FCC Tester
 
 > **Band 26 传导发射功率自动测试工具** — 基于 R&S CMW500 综测仪的 LTE UE 最大传导功率（Conducted TX Power）自动化测试上位机，面向 FCC 认证摸底。
 
