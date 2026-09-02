@@ -72,20 +72,8 @@ UL EARFCN 由公式换算：`N_UL = 26690 + 10 × (F_UL − 814)`
 
 ## 快速开始
 
-**方式一：直接运行发布版**
 
 从 [Releases](../../releases) 下载 `LTEFCCTesterVx.y.exe`，双击运行即可（自包含，无需安装环境）。
-
-**方式二：源码构建运行**
-
-```bash
-cd src
-dotnet restore
-dotnet build -c Release
-dotnet run
-```
-
-或用 Visual Studio 2022+ 打开 `src/LTEFCCTester.slnx` / `LTEFCCTester.csproj` 运行。
 
 ---
 
@@ -148,55 +136,12 @@ dotnet run
 
 ---
 
-## SCPI 测试流程
-
-关键指令序列（单条目 setup + measure）：
-
-```text
-# 信道设置（带宽 / EARFCN）
-CONF:LTE:SIGN1:BAND OB26
-CONF:LTE:SIGN1:CELL:BAND:DL <BwCode>          # 如 B050
-CONF:LTE:SIGN1:CELL:BAND:UL <BwCode>
-CONF:LTE:SIGN1:RFS:CHAN:UL <Earfcn>
-
-# 附着（完整路径：Cell ON → 等待 CEST，ATT 态自动发 CONN）
-CONF:LTE:SIGN1:CONN:STYP UDCH
-CONF:LTE:SIGN1:CONN:UDCH:UL <Rb>,<Off>,<Mod>,<Tbs>
-SOUR:LTE:SIGN1:CELL:STAT ON
-# 轮询 FETC:LTE:SIGN1:PSW:STAT? 直到 CEST
-
-# 测量
-CONF:LTE:SIGN1:UL:PUSC:TPC:SET MAXP           # UE 拉满功率
-CONF:LTE:MEAS:MEV:...                          # 配置 Multi-Evaluation
-INIT:LTE:MEAS:MEV
-# 轮询 FETC:LTE:MEAS:MEV:STAT:ALL? 直到 RDY
-FETC:LTE:MEAS:MEV:MOD:AVER?                    # 解析 index[17] = TX Power(dBm)
-```
-
 结果解析：优先取返回值 **index 17**（TX Power）；若为 `NCAP`/`INV`/`NAN` 等无效标记，则回退扫描 index 14–25 取首个合理功率值（约 0–60 dBm）。
 
 > 采用「按信道复用」策略：仅当 (带宽, EARFCN) 变化时才重新附着，同信道内只切换 UDCH 分配，缩短测试时间。
 
 ---
 
-## 项目结构
-
-```
-LTEFCCTester/
-├─ .github/workflows/release.yml   # 打 tag 自动构建单文件 EXE 并发布 Release
-├─ docs/                           # 文档目录（预留）
-└─ src/
-   ├─ LTEFCCTester.csproj  # 项目文件（net10.0-windows, WPF, x64）
-   ├─ App.xaml / App.xaml.cs       # WPF 应用入口
-   ├─ MainWindow.xaml(.cs)         # 主界面 + 核心测试逻辑：
-   │                               #   CmwController（TCP/SCPI）、测试计划模型、
-   │                               #   测试序列、线损写入、恢复触发、xlsx 导出
-   ├─ SimSimulatorClient.cs        # SIM Simulator 私有帧串口客户端（AT 复位恢复）
-   ├─ sim_simulator_tool.exe       # SIM Simulator 参考工具（随发布拷贝）
-   ├─ AssemblyInfo.cs / FCC.ico    # 程序集信息 / 图标
-   ├─ Properties/PublishProfiles/  # 发布配置
-   └─ TddMeasureSlotPatch.md       # Band 切换逻辑历史说明（早期版本）
-```
 
 > 说明：`LossSelector.cs` / `LossTable.cs` / `LossEditorWindow.cs` / `BandSwitchHandler.cs` 为早期 RFTestTool 遗留代码，已在 `.csproj` 中通过 `<Compile Remove>` 排除，不参与编译。`src/README.md` 为旧版（多频段 TPC MAX POWER）文档，已被本 README 取代。
 
