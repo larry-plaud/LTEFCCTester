@@ -15,7 +15,6 @@
 - [使用步骤](#使用步骤)
 - [线损补偿（Cable Loss）](#线损补偿cable-loss)
 - [掉线恢复（SIM Simulator）](#掉线恢复sim-simulator)
-- [SCPI 测试流程](#scpi-测试流程)
 - [判定标准](#判定标准)
 - [注意事项](#注意事项)
 
@@ -144,16 +143,6 @@ UL EARFCN 由公式换算：`N_UL = 26690 + 10 × (F_UL − 814)`
 > 说明：`LossSelector.cs` / `LossTable.cs` / `LossEditorWindow.cs` / `BandSwitchHandler.cs` 为早期 RFTestTool 遗留代码，已在 `.csproj` 中通过 `<Compile Remove>` 排除，不参与编译。`src/README.md` 为旧版（多频段 TPC MAX POWER）文档，已被本 README 取代。
 
 ---
-
-## 构建与发布
-
-**本地发布单文件 EXE：**
-
-```bash
-dotnet publish src/LTEFCCTester.csproj -c Release -r win-x64 --self-contained true ^
-  -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true ^
-  -p:EnableCompressionInSingleFile=true
-```
 
 **自动发布（CI）：** 推送形如 `v1.0` / `V1.0` 的 tag，`.github/workflows/release.yml` 会在 `windows-latest` 上自动：
 
